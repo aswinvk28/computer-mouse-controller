@@ -12,43 +12,32 @@ class HeadPoseEstimation:
     '''
     Class for the Face Detection Model.
     '''
-    def __init__(self, model_name, device='CPU', extensions=None):
-        '''
-        TODO: Use this to set your instance variables.
-        '''
-        self.device_name = device
-        self.model_name = model_name
-        self.model_bin = os.path.splitext(self.model_name)[0] + ".bin"
-
-    def load_model(self):
-        '''
-        TODO: You will need to complete this method.
-        This method is for loading the model to the device specified by the user.
-        If your model requires any Plugins, this is where you can load them.
-        '''
-        try:
-            self.core = IECore()
-            self.model = IENetwork()
-            self.net = self.core.load_network(self.model, device_name=self.device_name)
-            self.input_name = next(iter(self.model.inputs))
-            self.net_input_shape = self.model.inputs[self.input_name].shape
-        except Exception as e:
-            print("An exception occured in loading the model")
-
-        return self.net
-
-    def predict(self, image):
-        '''
-        TODO: You will need to complete this method.
-        This method is meant for running predictions on the input image.
-        '''
-        input_dict = {self.input_name: image}
-        self.net.infer(input_dict)
-
-    def check_model(self, request_id=0):
+    def __init__(self, net, threshold=0.60, args=None):
         
-        return self.net.requests[request_id].outputs
+        self.network = net
+        self.args = args
+        # Get the input layer
+        self.input_blob = next(iter(net.network.inputs))
+        self.output_blob = next(iter(net.network.outputs))
+            
+    def load_model(self, net, num_requests=1):
+        '''
+        TODO: This method needs to be completed by you
+        '''
+        
+        self.net_input_shape = net.network.inputs[self.input_blob].shape
+        
+    def predict(self, net, batch_images, request_id=0):
+        '''
+        TODO: This method needs to be completed by you
+        '''
+        for i in range(len(batch_images)):
+            status = net.requests[i].wait(-1)
 
+    def check_model(self, net, request_id=0):
+        
+        return net.network.requests[request_id].outputs
+        
     def preprocess_input(self, image):
         '''
         Before feeding the data into the model for inference,
@@ -61,18 +50,22 @@ class HeadPoseEstimation:
         return p_frame
 
     @staticmethod
-    def preprocess_output(self, outputs, frame, confidence_level=0.5):
+    def preprocess_output(outputs, output_name, frame, confidence_level=0.5):
         '''
         Before feeding the output of this model to the next model,
         you might have to preprocess the output. This function is where you can do that.
         '''
-        keys = ['angle_y_fc', 'angle_p_fc', 'angle_r_fc']
-        output_keys = ['yaw', 'pitch', 'roll']
+        try:
+            keys = ['angle_y_fc', 'angle_p_fc', 'angle_r_fc']
+            output_keys = ['yaw', 'pitch', 'roll']
 
-        matrix = np.zeros((outputs[keys[0]].shape[1],3))
-        for ii,k in enumerate(keys):
-            for idx in range(outputs[k].shape[1]):
-                matrix[idx,ii] = outputs[k][0,idx,0].item()
+            matrix = np.zeros((outputs[keys[0]].shape[1],3))
+            for ii,k in enumerate(keys):
+                for idx in range(outputs[k].shape[1]):
+                    matrix[idx,ii] = outputs[k][0,idx,0].item()
+
+        except Exception as e:
+            print(e.args)
 
         # result matrix
         return matrix, []

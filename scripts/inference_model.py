@@ -37,11 +37,19 @@ def infer(args):
     input_feeder.load_data()
     input_time_s, load_time_s, inference_time_s = [], [], []
     frame = input_feeder.cap
+    args.models = args.models.split(",")
     for ii, model in enumerate(model_classes):
         start_time = time.time()
         net = Network()
         model_path = model_paths[ii]
-        net.load_model(model_path, device='CPU', cpu_extension=CPU_EXTENSION)
+        if os.path.isfile(model_path):
+            net.load_model(model_path, device='CPU', cpu_extension=CPU_EXTENSION)
+        else:
+            print(model_path, " does not exist")
+            continue
+
+        model_object = model(net)
+        model_object.load_model(net)
 
         # Get and open video capture
         input_img = cv2.imread(args.image)
@@ -52,7 +60,12 @@ def infer(args):
         start_time = time.time()
         net_input_shape = net.get_input_shape()
 
-        p_frame = preprocessing(input_img, net_input_shape)
+        if args.models[ii] == "gaze_estimation":
+            vector = np.random.randn(1,3)
+            result = model_object.preprocess_input(frame, vector)
+        else:
+            p_frame = model_object.preprocess_input(frame)
+
         end_time = time.time()
         input_time = end_time - start_time
 
@@ -60,7 +73,11 @@ def infer(args):
 
         start_time = time.time()
         for i in range(args.iterations):
-            net.sync_inference(p_frame)
+            if args.models[ii] == "gaze_estimation":
+                input_dict = dict(zip(list(result.keys()), list(result.values())))
+                net.d_sync_inference(input_dict)
+            else:
+                net.sync_inference(p_frame)
         end_time = time.time()
         inference_time = end_time - start_time
 
@@ -68,23 +85,16 @@ def infer(args):
         load_time_s.append(load_time)
         inference_time_s.append(inference_time)
 
-    return input_time_s, load_time_s, inference_time_s
-
-def preprocessing(frame, net_input_shape, request_id=0):
-    # TODO: Using the input image, run inference on the model for 10 iterations
-    p_frame = cv2.resize(frame, (net_input_shape[3], net_input_shape[2]))
-    p_frame = p_frame.transpose((2,0,1))
-    p_frame = p_frame.reshape(1, *p_frame.shape)
-
-    return p_frame
+    return args.models, input_time_s, load_time_s, inference_time_s
 
 if __name__=='__main__':
 
     args = get_args()
-    input_time_s, load_time_s, inference_time_s = infer(args)
+    models, input_time_s, load_time_s, inference_time_s = infer(args)
 
-    for input_time, load_time, inference_time in zip(input_time_s, load_time_s, inference_time_s):
-        print("Model...")
+    print("Precision: ", args.precision)
+    for model, input_time, load_time, inference_time in zip(models, input_time_s, load_time_s, inference_time_s):
+        print("Model...: ", model)
         print("Model Load Time is: ", load_time)
         print("Inference Time is: ", (inference_time) / args.iterations)
         print("Input/Output Time is: ", input_time)

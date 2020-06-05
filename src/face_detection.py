@@ -20,15 +20,15 @@ class FaceDetection:
         self.network = net
         self.args = args
         # Get the input layer
-        self.input_blob = next(iter(self.network.inputs))
-        self.output_blob = next(iter(self.network.outputs))
+        self.input_blob = next(iter(net.network.inputs))
+        self.output_blob = next(iter(net.network.outputs))
             
-    def load_model(self, num_requests=1):
+    def load_model(self, net, num_requests=1):
         '''
         TODO: This method needs to be completed by you
         '''
         
-        self.net_input_shape = self.network.inputs[self.input_blob].shape
+        self.net_input_shape = net.network.inputs[self.input_blob].shape
         
     def predict(self, net, batch_images, request_id=0):
         '''
@@ -37,30 +37,10 @@ class FaceDetection:
         for i in range(len(batch_images)):
             status = net.requests[i].wait(-1)
 
-    def check_model(self, request_id=0):
+    def check_model(self, net, request_id=0):
         
-        return self.network.requests[request_id].outputs
+        return net.network.requests[request_id].outputs
         
-    def preprocess_outputs(self, frame, outputs, confidence_level=0.4):
-        '''
-        TODO: This method needs to be completed by you
-        '''
-        height, width = frame.shape[:2]
-        if (len(outputs) > 0) and (len(outputs[0][0]) > 0):
-            boxes = []
-            confs = []
-            for res in outputs[0][0]:
-                _, label, conf, xmin, ymin, xmax, ymax = res
-                if conf > confidence_level:
-                    xmin = int(xmin*width)
-                    ymin = int(ymin*height)
-                    xmax = int(xmax*width)
-                    ymax = int(ymax*height)
-                    boxes.append([xmin, ymin, xmax, ymax])
-                    confs.append(conf)
-        
-        return boxes, confs
-
     def preprocess_input(self, image):
         '''
         Before feeding the data into the model for inference,

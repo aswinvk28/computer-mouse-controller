@@ -11,7 +11,7 @@ def parse_args():
     parser.add_argument("--device", help="", default='CPU')
     parser.add_argument("--conf", help="", default=0.65)
     parser.add_argument("--batch_size", help="", default=32)
-    parser.add_argument("--", help="", default=2, type=int)
+    parser.add_argument("--threshold", help="", default=2, type=int)
 
     args = parser.parse_args()
 
@@ -54,6 +54,8 @@ def main():
     frames = []
     width = int(cap.get(3))
     height = int(cap.get(4))
+    boxes_list = []
+    confs_list = []
     out = cv2.VideoWriter("output_video.avi", cv2.VideoWriter_fourcc(*'XVID'), 30, (width, height))
     for frame in input_feeder.next_batch():
         if (counter+1) % 4 == 0:
@@ -66,6 +68,7 @@ def main():
                 res = output_result[ii]
                 for jj, model in enumerate(model_classes):
                     boxes, confs = res[jj]
+                
 
         else:
             frames = []

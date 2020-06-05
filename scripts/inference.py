@@ -74,6 +74,12 @@ class Network:
         '''
         self.exec_network.infer({self.input_blob: image})
 
+    def d_sync_inference(self, input_dict):
+        '''
+        Makes an asynchronous inference request, given an input image.
+        '''
+        self.exec_network.infer(input_dict)
+
     def wait(self):
         '''
         Checks the status of the inference request.

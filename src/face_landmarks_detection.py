@@ -16,15 +16,15 @@ class FaceLandMarksDetection:
         self.network = net
         self.args = args
         # Get the input layer
-        self.input_blob = next(iter(self.network.inputs))
-        self.output_blob = next(iter(self.network.outputs))
-
-    def load_model(self, num_requests=1):
+        self.input_blob = next(iter(net.network.inputs))
+        self.output_blob = next(iter(net.network.outputs))
+            
+    def load_model(self, net, num_requests=1):
         '''
         TODO: This method needs to be completed by you
         '''
         
-        self.net_input_shape = self.network.inputs[self.input_blob].shape
+        self.net_input_shape = net.network.inputs[self.input_blob].shape
         
     def predict(self, net, batch_images, request_id=0):
         '''
@@ -33,10 +33,10 @@ class FaceLandMarksDetection:
         for i in range(len(batch_images)):
             status = net.requests[i].wait(-1)
 
-    def check_model(self, request_id=0):
+    def check_model(self, net, request_id=0):
         
-        return self.network.requests[request_id].outputs
-
+        return net.network.requests[request_id].outputs
+        
     def preprocess_input(self, image):
         '''
         Before feeding the data into the model for inference,
