@@ -1,5 +1,5 @@
 # created by virtualenv automatically
-bin/
+# bin/
 __pycache__/
 *.swp
 
