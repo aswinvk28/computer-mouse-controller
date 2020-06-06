@@ -35,11 +35,7 @@ class InputFeeder:
         Returns the next image from either a video file or webcam.
         If input_type is 'image', then it returns the same image.
         '''
-        logging.info("Reading batch data..")
-        while True:
-            for _ in range(10):
-                _, frame=self.cap.read()
-            yield frame
+        pass
 
 
     def close(self):

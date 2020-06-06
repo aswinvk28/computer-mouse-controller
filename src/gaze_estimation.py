@@ -20,7 +20,7 @@ class GazeEstimation:
         # Get the input layer
         self.input_blob = list(iter(net.network.inputs))
         self.output_blob = next(iter(net.network.outputs))
-            
+        
     def load_model(self, net, num_requests=1):
         '''
         TODO: This method needs to be completed by you
@@ -34,12 +34,16 @@ class GazeEstimation:
         '''
         TODO: This method needs to be completed by you
         '''
+        for ii, p_frame in enumerate(batch_images):
+            head_pose_angles = np.random.randn(1,3) * 10.0
+            p_frame['head_pose_angles'] = head_pose_angles
+            net.exec_network.start_async(inputs=p_frame, request_id=ii)
         for i in range(len(batch_images)):
-            status = net.requests[i].wait(-1)
+            status = net.wait(request_id=i)
 
     def check_model(self, net, request_id=0):
         
-        return net.network.requests[request_id].outputs
+        return net.exec_network.requests[request_id].outputs
 
     def preprocess(self, image, name):
         p_frame = cv2.resize(image, (self.net_input_shape[name][3], self.net_input_shape[name][2]))

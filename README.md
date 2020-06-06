@@ -36,7 +36,9 @@ __Downloading OpenVINO Models__
 
 ```bash
 
-    python exec.py --models="face,head_pose,facial_landmarks,gaze_estimation" --input_file "bin/demo.mp4" --device "CPU"
+    python exec.py --models="face,head_pose,facial_landmarks,gaze_estimation" --input_file "bin/demo.mp4" --device "CPU" --precision INT1
+
+    python exec.py --models="face_regular,head_pose,facial_landmarks,gaze_estimation" --input_file "bin/demo.mp4" --device "CPU" --threshold 0.6 --precision FP16
 
 ```
 
@@ -156,13 +158,36 @@ The models used are:
 ## Stand Out Suggestions
 This is where you can provide information about the stand out suggestions that you have attempted.
 
-
+[./scripts/perf_counts_face-det.log](./scripts/perf_counts_face-det.log)
 
 ### Async Inference
 If you have used Async Inference in your code, benchmark the results and explain its effects on power and performance of your project.
 
+Compute Power
+-------------
+
+Compute Power is dependent on CPU Time or Compute Time, 
+
+```bash
+
+    python inference_layer.py --model "head_pose" --precision FP16 --device CPU --image "../images/image1.png" --threshold 0.6 > perf_counts_FP16_head_pose.log
+
+```
 
 
 ### Edge Cases
 There will be certain situations that will break your inference flow. For instance, lighting changes or multiple people in the frame. Explain some of the edge cases you encountered in your project and how you solved them to make your project more robust.
 
+/opt/intel/vtune_profiler_2020.0.0.605129/bin64/vtune -collect hotspots -app-working-dir /home/aswin/Documents/Courses/Udacity/Intel-Edge-Phase2/Projects/Computer-Pointer-Controller/starter/scripts -- /bin/bash vtune_application.sh -f "--iterations 1000 --model person-detection-retail-0013/FP32/person-detection-retail-0013 --device CPU --image retail_image.png"
+
+![./scripts/screenshot-r-image.png](./scripts/screenshot-r-image.png)
+
+![./scripts/tutorial-r-image.png](./scripts/tutorial-r-image.png)
+
+### Lighting and Performance
+
+Lighting is dependent on the mean normalized values. It can be represented as the ratio of steadily increasing numerator vs steadily increasing denominator in the cases where the brightness of the image increases. It is observed that when the brightness increases the accuracy of the model decreases, and it is the reverse otherwise. The performance of the model as well reduces based on detections. The performance of the model is dependent on the ground truth of the data. When the ground truth of the data is altered, the time of execution of the model is reduced due to mean normalization of the image. 
+
+### Multiple People in Frame
+
+In the cases where there are multiple people in the frame, the performance counts is reduced. 

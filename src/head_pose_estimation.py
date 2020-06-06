@@ -31,12 +31,13 @@ class HeadPoseEstimation:
         '''
         TODO: This method needs to be completed by you
         '''
+        for ii, p_frame in enumerate(batch_images):
+            net.async_inference(p_frame, request_id=ii)
         for i in range(len(batch_images)):
-            status = net.requests[i].wait(-1)
+            status = net.wait(request_id=i)
 
     def check_model(self, net, request_id=0):
-        
-        return net.network.requests[request_id].outputs
+        return net.exec_network.requests[request_id].outputs
         
     def preprocess_input(self, image):
         '''
@@ -61,6 +62,7 @@ class HeadPoseEstimation:
 
             matrix = np.zeros((outputs[keys[0]].shape[1],3))
             for ii,k in enumerate(keys):
+                print(outputs[k].shape)
                 for idx in range(outputs[k].shape[1]):
                     matrix[idx,ii] = outputs[k][0,idx,0].item()
 

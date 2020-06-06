@@ -34,12 +34,14 @@ class FaceDetection:
         '''
         TODO: This method needs to be completed by you
         '''
+        for ii, p_frame in enumerate(batch_images):
+            net.async_inference(p_frame, request_id=ii)
         for i in range(len(batch_images)):
-            status = net.requests[i].wait(-1)
+            status = net.wait(request_id=i)
 
     def check_model(self, net, request_id=0):
         
-        return net.network.requests[request_id].outputs
+        return net.exec_network.requests[request_id].outputs
         
     def preprocess_input(self, image):
         '''

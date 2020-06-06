@@ -5,7 +5,7 @@ import sys
 import argparse
 import cv2
 sys.path.append("../")
-from model_list import get_face_model, get_face_landmarks_model, get_gaze_model, get_head_pose_model, obtain_models
+from model_list import get_face_model_regular, get_face_model, get_face_landmarks_model, get_gaze_model, get_head_pose_model, obtain_models
 from src.input_feeder import InputFeeder
 from inference import Network
 

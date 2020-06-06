@@ -23,8 +23,7 @@ class Network:
         self.exec_network = None
         self.infer_request = None
 
-
-    def load_model(self, model, device="CPU", cpu_extension=None):
+    def load_model(self, model, device="CPU", cpu_extension=None, args=None):
         '''
         Load the model given IR files.
         Defaults to CPU as device for use in the workspace.
@@ -44,7 +43,7 @@ class Network:
         self.network = IENetwork(model=model_xml, weights=model_bin)
 
         # Load the IENetwork into the plugin
-        self.exec_network = self.plugin.load_network(self.network, device)
+        self.exec_network = self.plugin.load_network(self.network, device, num_requests=args.batch_size)
 
         # Get the input layer
         self.input_blob = next(iter(self.network.inputs))
@@ -52,19 +51,18 @@ class Network:
 
         return
 
-
     def get_input_shape(self):
         '''
         Gets the input shape of the network
         '''
         return self.network.inputs[self.input_blob].shape
 
-
-    def async_inference(self, image):
+    def async_inference(self, image, request_id=0):
         '''
         Makes an asynchronous inference request, given an input image.
         '''
-        self.exec_network.start_async(request_id=0, 
+        self.exec_network.start_async(
+            request_id=request_id, 
             inputs={self.input_blob: image})
         return
 
@@ -80,13 +78,12 @@ class Network:
         '''
         self.exec_network.infer(input_dict)
 
-    def wait(self):
+    def wait(self, request_id=0):
         '''
         Checks the status of the inference request.
         '''
-        status = self.exec_network.requests[0].wait(-1)
+        status = self.exec_network.requests[request_id].wait(-1)
         return status
-
 
     def extract_output(self):
         '''

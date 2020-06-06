@@ -7,8 +7,11 @@ import time
 def get_face_model(precision='INT1'):
     return "face-detection-adas-binary-0001/"+precision+"/face-detection-adas-binary-0001.xml"
 
+def get_face_model_regular(precision='FP16'):
+    return "face-detection-adas-0001/"+precision+"/face-detection-adas-0001.xml"
+
 def get_face_landmarks_model(precision='FP16'):
-    return "facial-landmarks-35-adas-0002/"+precision+"/facial-landmarks-35-adas-0002.xml"
+    return "landmarks-regression-retail-0009/"+precision+"/landmarks-regression-retail-0009.xml"
 
 def get_gaze_model(precision='FP16'):
     return "gaze-estimation-adas-0002/"+precision+"/gaze-estimation-adas-0002.xml"
@@ -25,6 +28,9 @@ def obtain_models(args, prefix="/home/workspace/ir_models/intel/"):
     for m in models:
         if m == "face":
             model_path = prefix + get_face_model(args.precision)
+            model_class = FaceDetection
+        if m == "face_regular":
+            model_path = prefix + get_face_model_regular(args.precision)
             model_class = FaceDetection
         elif m == "head_pose":
             model_path = prefix + get_head_pose_model(args.precision)
