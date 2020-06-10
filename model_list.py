@@ -19,8 +19,10 @@ def get_gaze_model(precision='FP16'):
 def get_head_pose_model(precision='FP16'):
     return "head-pose-estimation-adas-0001/"+precision+"/head-pose-estimation-adas-0001.xml"
 
-def obtain_models(args, prefix="/home/workspace/ir_models/intel/"):
-    models = args.models.split(",")
+def obtain_models(args, models=None):
+    prefix = args.prefix
+    if models is None:
+        models = args.models.split(",")
     model_paths = []
     model_classes = []
     model_path = None

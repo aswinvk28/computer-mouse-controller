@@ -6,55 +6,17 @@ This has been provided just to give you an idea of how to structure your model c
 import os
 import cv2
 import numpy as np
+from .Adapter import Adapter
+from concurrent.futures import ThreadPoolExecutor
 
-class FaceLandMarksDetection:
+class FaceLandMarksDetection(Adapter):
     '''
-    Class for the Face Detection Model.
+    Class for the Face landmarks Detection Model.
     '''
-    def __init__(self, net, threshold=0.60, args=None):
-        
-        self.network = net
-        self.args = args
-        # Get the input layer
-        self.input_blob = next(iter(net.network.inputs))
-        self.output_blob = next(iter(net.network.outputs))
-            
-    def load_model(self, net, num_requests=1):
-        '''
-        TODO: This method needs to be completed by you
-        '''
-        
-        self.net_input_shape = net.network.inputs[self.input_blob].shape
-        
-    def predict(self, net, batch_images, request_id=0):
-        '''
-        TODO: This method needs to be completed by you
-        '''
-        for ii, p_frame in enumerate(batch_images):
-            net.async_inference(p_frame, request_id=ii)
-        for i in range(len(batch_images)):
-            status = net.wait(request_id=i)
-
-    def check_model(self, net, request_id=0):
-        
-        return net.exec_network.requests[request_id].outputs
-        
-    def preprocess_input(self, image):
-        '''
-        Before feeding the data into the model for inference,
-        you might have to preprocess it. This function is where you can do that.
-        '''
-        p_frame = cv2.resize(image, (self.net_input_shape[3], self.net_input_shape[2]))
-        p_frame = p_frame.transpose((2,0,1))
-        p_frame = p_frame.reshape(1, *p_frame.shape)
-
-        return p_frame
-
     @staticmethod
     def preprocess_output(outputs, output_name, frame, confidence_level=0.5):
         '''
-        Before feeding the output of this model to the next model,
-        you might have to preprocess the output. This function is where you can do that.
+        Preprocesses the output based on facial landmark points
         '''
         try:
             outputs = outputs[output_name]
@@ -62,13 +24,25 @@ class FaceLandMarksDetection:
             height, width = frame.shape[:2]
             if len(outputs) > 0:
                 for res in outputs:
-                    left_eye_x, left_eye_y, 
-                    right_eye_x, right_eye_y, nose_x, nose_y, 
-                    left_lip_x, left_lip_y, right_lip_x, right_lip_y = res
+                    left_eye_x, left_eye_y, \
+                    right_eye_x, right_eye_y, nose_x, nose_y, \
+                    left_lip_x, left_lip_y, right_lip_x, right_lip_y = tuple(res[:,0,0].tolist())
                     
-                    boxes.append([(left_eye_x, left_eye_y), (right_eye_x, right_eye_y), 
-                    (nose_x, nose_y), (left_lip_x, left_lip_y), (right_lip_x, right_lip_y)])
+                    left_eye_x = int(left_eye_x*width)
+                    left_eye_y = int(left_eye_y*height)
+                    right_eye_x = int(right_eye_x*width)
+                    right_eye_y = int(right_eye_y*height)
+                    nose_x = int(nose_x*width)
+                    nose_y = int(nose_y*height)
+                    left_lip_x = int(left_lip_x*width)
+                    left_lip_y = int(left_lip_y*height)
+                    right_lip_x = int(right_lip_x*width)
+                    right_lip_y = int(right_lip_y*height)
+                    boxes.append((left_eye_x, left_eye_y, right_eye_x, right_eye_y, \
+                    nose_x, nose_y, left_lip_x, left_lip_y, right_lip_x, right_lip_y))
         except Exception as e:
+            print(res.shape)
+            raise e
             print(e.args)
 
         # coordinate points

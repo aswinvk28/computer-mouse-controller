@@ -33,10 +33,10 @@ def main(args, model_name):
     model = IENetwork(model_structure, model_weights)
     net = plugin.load_network(model, device, num_requests=1)
 
-    input_name=next(iter(model.inputs))
+    input_name = next(iter(model.inputs))
 
     # Reading and Preprocessing Image
-    input_img=cv2.imread(image_path)
+    input_img = cv2.imread(image_path)
     input_img = cv2.cvtColor(input_img, cv2.COLOR_BGR2RGB)
     
     input_blob = next(iter(model.inputs))
@@ -69,6 +69,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", help="", required=True)
     parser.add_argument('--device', default='CPU')
+    parser.add_argument('--prefix', default="/home/workspace/ir_models/intel/")
     parser.add_argument('--precision', default='FP16')
     parser.add_argument('--image', default=None)
     parser.add_argument('--threshold', default=0.6, type=float)
@@ -81,7 +82,7 @@ if __name__ == "__main__":
 
     args = get_args()
     model_name = args.model
-    prefix = "/home/workspace/ir_models/intel/"
+    prefix = args.prefix
     if args.model == "face":
         args.model = os.path.splitext(os.path.join(prefix, get_face_model(args.precision)))[0]
     elif args.model == "face_regular":

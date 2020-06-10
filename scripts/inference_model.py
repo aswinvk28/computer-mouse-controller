@@ -7,7 +7,7 @@ import cv2
 sys.path.append("../")
 from model_list import get_face_model_regular, get_face_model, get_face_landmarks_model, get_gaze_model, get_head_pose_model, obtain_models
 from src.input_feeder import InputFeeder
-from inference import Network
+from Network import Network
 
 CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
 
@@ -23,6 +23,7 @@ def get_args():
     parser.add_argument('--iterations', default=None)
     parser.add_argument('--precision', default=None)
     parser.add_argument('--create_models', default=False)
+    parser.add_argument('--batch_size', default=1, type=int)
     parser.add_argument('--threshold', default=0.6, type=float)
     
     args = parser.parse_args()
@@ -43,7 +44,7 @@ def infer(args):
         net = Network()
         model_path = model_paths[ii]
         if os.path.isfile(model_path):
-            net.load_model(model_path, device='CPU', cpu_extension=CPU_EXTENSION)
+            net.load_model(model_path, device='CPU', cpu_extension=CPU_EXTENSION, args=args)
         else:
             print(model_path, " does not exist")
             continue

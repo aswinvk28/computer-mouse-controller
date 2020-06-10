@@ -34,13 +34,120 @@ __Downloading OpenVINO Models__
 ## Demo
 *TODO:* Explain how to run a basic demo of your model.
 
+### How to run a demo
+
 ```bash
 
-    python exec.py --models="face,head_pose,facial_landmarks,gaze_estimation" --input_file "bin/demo.mp4" --device "CPU" --precision INT1
+    python exec.py --face="face_regular" --pose="head_pose" --landmarks="facial_landmarks" --gaze="gaze_estimation" --device=CPU --precision=FP16 --conf=0.6 --prefix="/home/workspace/ir_models/intel/" --input_file=bin/demo.mp4 --batch_size=64 --produce_batch_size=64 --output_path="output_video.avi" --input_type="video"
 
-    python exec.py --models="face_regular,head_pose,facial_landmarks,gaze_estimation" --input_file "bin/demo.mp4" --device "CPU" --threshold 0.6 --precision FP16
+    python exec.py --face="face_regular" --pose="head_pose" --landmarks="facial_landmarks" --gaze="gaze_estimation" --device=CPU --precision=FP16 --conf=0.6 --prefix="/home/workspace/ir_models/intel/" --input_file=bin/demo.mp4 --batch_size=64 --produce_batch_size=64 --output_path="output_video.avi" --input_type="cam"
 
 ```
+
+```log
+
+    595  Frame(s) loading time:  2.816478967666626
+    Preprocess and exec async for face detection:  2.4484846591949463
+    Post-process face detection:  17.753494024276733
+    Preprocess and exec async for facial landmarks:  0.11207461357116699
+    Post-process facial landmarks:  1.554227352142334
+    Preprocess and exec async head pose:  0.1344296932220459
+    Post-process head pose:  0.8885765075683594
+    Preprocess and exec async gaze estimation:  0.0001327991485595703
+    Post-process gaze:  0.019771575927734375
+    Post-process video writing and painting time:  6.6302924156188965
+
+```
+
+### The command line options
+
+exec.py
+
+```log
+    
+    --face="face_regular"
+    --pose="head_pose"
+    --landmarks="facial_landmarks"
+    --gaze="gaze_estimation"
+    --device="CPU"
+    --precision="FP16"
+    --conf="0.6"
+    --prefix="/home/workspace/ir_models/intel/"
+    --input_file="bin/demo.mp4"
+    --batch_size="64"
+    --produce_batch_size="64"
+    --output_path="output_video.avi"
+
+```
+
+inference_layer.py
+
+```log
+
+    --model="head_pose" 
+    --precision=FP16 
+    --device=CPU 
+    --image="../images/image1.png" 
+    --threshold=0.6
+
+```
+
+inference_model.py
+
+```log
+
+    --models="face,head_pose,facial_landmarks,gaze_estimation" 
+    --precision="FP16" 
+    --device="CPU" 
+    --image="../images/image1.png" 
+    --prefix="/home/workspace/ir_models/intel/" 
+    --iterations=100
+
+```
+
+
+### The directory structure
+
+- models/                               The models directory
+
+- scripts/      
+        
+        - inference_layer.py            Measures / outputs the performance counts of each model
+
+        - inference_model.py            Measures / prints out the model load time, inference time and input/output time
+
+        - Network.py                    The network python class that loads the models and executes inferences
+
+Async inferences have been used in these comamnd line scripts
+
+- src/
+
+        - Adapter.py                    The class that actas as a parent for inference model classes
+
+        - face_detection.py             The Face detection model 
+
+        - face_landmarks_detection.py   The Face landmarks detection model
+
+        - gaze_estimation.py            The Gaze estimation model
+
+        - head_pose_estimation.py       The Head Pose Estimation model
+
+- exec.py                               The command line file to execute the demo 
+
+- model_list.py                         The list of models loaded by a prefix
+
+- images/                               The images directory that contain list of sample collected images
+
+- output1.png                           The output image 1 of the person
+
+- output2.png                           The output image 2 of the person
+
+- out_vid3.gif                          The demo whitemarked animation
+
+- output_video.gif                      The demo file to show response of the models
+
+- mouse_pointer.gif                     The demo mouse pointer animation
+
 
 ## Documentation
 *TODO:* Include any documentation that users might need to better understand your project code. For instance, this is a good place to explain the command line arguments that your project supports.
@@ -56,6 +163,7 @@ The models used are:
 - Head Pose Estimation
 
 - Gaze Estimation
+
 
 ## Benchmarks
 *TODO:* Include the benchmark results of running your model on multiple hardwares and multiple model precisions. Your benchmarks can include: model loading time, input/output processing time, model inference time etc.
@@ -89,6 +197,7 @@ The models used are:
     Input/Output Time is:  0.00022840499877929688
 
 ```
+
 
 ## Results
 *TODO:* Discuss the benchmark results and explain why you are getting the results you are getting. For instance, explain why there is difference in inference time for FP32, FP16 and INT8 models.
@@ -160,6 +269,7 @@ This is where you can provide information about the stand out suggestions that y
 
 [./scripts/perf_counts_face-det.log](./scripts/perf_counts_face-det.log)
 
+
 ### Async Inference
 If you have used Async Inference in your code, benchmark the results and explain its effects on power and performance of your project.
 
@@ -167,6 +277,7 @@ Compute Power
 -------------
 
 Compute Power is dependent on CPU Time or Compute Time, 
+
 
 ```bash
 
@@ -180,13 +291,16 @@ There will be certain situations that will break your inference flow. For instan
 
 /opt/intel/vtune_profiler_2020.0.0.605129/bin64/vtune -collect hotspots -app-working-dir /home/aswin/Documents/Courses/Udacity/Intel-Edge-Phase2/Projects/Computer-Pointer-Controller/starter/scripts -- /bin/bash vtune_application.sh -f "--iterations 1000 --model person-detection-retail-0013/FP32/person-detection-retail-0013 --device CPU --image retail_image.png"
 
-![./scripts/screenshot-r-image.png](./scripts/screenshot-r-image.png)
+![./scripts/screenshot-image.png](./scripts/screenshot-image.png)
 
-![./scripts/tutorial-r-image.png](./scripts/tutorial-r-image.png)
+![./scripts/tutorial-image.png](./scripts/tutorial-image.png)
+
 
 ### Lighting and Performance
 
-Lighting is dependent on the mean normalized values. It can be represented as the ratio of steadily increasing numerator vs steadily increasing denominator in the cases where the brightness of the image increases. It is observed that when the brightness increases the accuracy of the model decreases, and it is the reverse otherwise. The performance of the model as well reduces based on detections. The performance of the model is dependent on the ground truth of the data. When the ground truth of the data is altered, the time of execution of the model is reduced due to mean normalization of the image. 
+**Lighting is dependent on the mean normalized values. It can be represented as the ratio of steadily increasing numerator vs steadily increasing denominator in the cases where the brightness of the image increases. It is observed that when the brightness increases the accuracy of the model decreases, and it is the reverse otherwise.**
+
+**The performance of the model as well reduces based on detections. The performance of the model is dependent on the ground truth of the data. When the ground truth of the data is altered, the time of execution of the model is reduced due to mean normalization of the image.**
 
 ### Multiple People in Frame
 

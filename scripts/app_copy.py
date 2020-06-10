@@ -1,6 +1,6 @@
 import argparse
 import cv2
-from inference import Network
+from Network import Network
 import numpy as np
 import os
 import time

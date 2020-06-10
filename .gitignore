@@ -2,4 +2,10 @@
 # bin/
 __pycache__/
 *.swp
-
+*.avi
+*.mp4
+models/
+lib/
+bin/
+share/
+.gitignore
