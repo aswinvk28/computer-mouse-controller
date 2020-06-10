@@ -7,13 +7,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 class ImageFrame(Pipeline):
 
-    def __init__(self, model_type, model_class, objects, networks, objs, nets):
-        self.model_type = model_type
-        self.model_class = model_class
-        self.objects = objects
-        self.networks = networks
-        self.objs = objs
-        self.nets = nets
+    def __init__(self, model_type, model_class, objects, networks, objs, nets, logging=None):
+        Pipeline.__init__(self, model_type, model_class, objects, networks, objs, nets, logging)
         self.idx = 0
 
     def exec_result_frame(self, obj, net, model_class, frames, request_id):
@@ -21,7 +16,7 @@ class ImageFrame(Pipeline):
 
     # preprocessing the model, executing the async inference
     def run(self, args, frames, model_classes):
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             for counter in range(0,len(frames),args.batch_size):
                 counter_array = [[counter]]
                 counter_array = np.array(counter_array)
@@ -59,7 +54,7 @@ class ImageFrame(Pipeline):
         gen_frames, faces, face_boxes = [], [], []
 
         # postprocessing the outputs, from face detection for all objects
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             for counter in range(0,len(frames),args.produce_batch_size):
                 counter_array = [[counter]]
                 counter_array = np.array(counter_array)

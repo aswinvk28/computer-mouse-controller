@@ -34,7 +34,7 @@ class FaceDetection(Adapter):
                         boxes.append([xmin, ymin, xmax, ymax])
                         confs.append(conf)
         except Exception as e:
-            print(e.args)
+            raise e
         
         # coordinate points
         return boxes, confs

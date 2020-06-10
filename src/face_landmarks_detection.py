@@ -41,9 +41,7 @@ class FaceLandMarksDetection(Adapter):
                     boxes.append((left_eye_x, left_eye_y, right_eye_x, right_eye_y, \
                     nose_x, nose_y, left_lip_x, left_lip_y, right_lip_x, right_lip_y))
         except Exception as e:
-            print(res.shape)
             raise e
-            print(e.args)
 
         # coordinate points
         return boxes, []

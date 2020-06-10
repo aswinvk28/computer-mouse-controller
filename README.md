@@ -5,7 +5,12 @@
 To move the mouse pointer based on the head pose, facial landmarks that use eye coordination, detected face and gaze estimation.
 
 ## Project Set Up and Installation
+
 *TODO:* Explain the setup procedures to run your project. For instance, this can include your project directory structure, the models you need to download and where to place them etc. Also include details about how to install the dependencies your project requires.
+
+The virtual environment consists of: opencv, ipython, numpy and uses python 3.6 version
+
+### Virtual Environment
 
 ```bash
 
@@ -17,7 +22,28 @@ To move the mouse pointer based on the head pose, facial landmarks that use eye 
 
 ```
 
+### Raising an Exception
+
+The change in prefix path of the intel model throws up an exception
+
+```log
+
+    python exec.py --face="face_regular" --pose="head_pose" --landmarks="facial_landmarks" --gaze="gaze_estimation" --device=CPU --conf=0.6 --prefix="/home/workspace/ir_models" --input_file=bin/demo.mp4 --batch_size=64 --produce_batch_size=64 --output_path="output_video.avi" --input_type="video" --precisions_order="INT1,FP16,FP16,FP16"
+
+    Traceback (most recent call last):
+    File "exec.py", line 213, in <module>
+        main()
+    File "exec.py", line 66, in main
+        model_paths, model_classes = obtain_models(args, models, precisions)
+    File "/home/aswin/Documents/Courses/Udacity/Intel-Edge-Phase2/Projects/Computer-Pointer-Controller/starter/model_list.py", line 34, in obtain_models
+        p = args.precisions[ii]
+    AttributeError: 'Namespace' object has no attribute 'precisions'
+
+```
+
 __Downloading OpenVINO Models__
+
+In order to download the OpenVINO models, `downloader.py` script is being used
 
 ```bash
 
@@ -38,24 +64,25 @@ __Downloading OpenVINO Models__
 
 ```bash
 
-    python exec.py --face="face_regular" --pose="head_pose" --landmarks="facial_landmarks" --gaze="gaze_estimation" --device=CPU --precision=FP16 --conf=0.6 --prefix="/home/workspace/ir_models/intel/" --input_file=bin/demo.mp4 --batch_size=64 --produce_batch_size=64 --output_path="output_video.avi" --input_type="video"
+    python exec.py --face="face" --pose="head_pose" --landmarks="facial_landmarks" --gaze="gaze_estimation" --device=CPU --conf=0.6 --prefix="/home/workspace/ir_models/intel/" --input_file=bin/demo.mp4 --batch_size=64 --produce_batch_size=64 --output_path="output_video.avi" --input_type="video" --precisions_order="INT1,FP16,FP16,FP16"
 
-    python exec.py --face="face_regular" --pose="head_pose" --landmarks="facial_landmarks" --gaze="gaze_estimation" --device=CPU --precision=FP16 --conf=0.6 --prefix="/home/workspace/ir_models/intel/" --input_file=bin/demo.mp4 --batch_size=64 --produce_batch_size=64 --output_path="output_video.avi" --input_type="cam"
+    python exec.py --face="face" --pose="head_pose" --landmarks="facial_landmarks" --gaze="gaze_estimation" --device=CPU --conf=0.6 --prefix="/home/workspace/ir_models/intel/" --input_file=bin/demo.mp4 --batch_size=4 --produce_batch_size=4 --output_path="output_video.avi" --input_type="cam" --precisions_order="INT1,FP16,FP16,FP16"
 
 ```
 
 ```log
 
-    595  Frame(s) loading time:  2.816478967666626
-    Preprocess and exec async for face detection:  2.4484846591949463
-    Post-process face detection:  17.753494024276733
-    Preprocess and exec async for facial landmarks:  0.11207461357116699
-    Post-process facial landmarks:  1.554227352142334
-    Preprocess and exec async head pose:  0.1344296932220459
-    Post-process head pose:  0.8885765075683594
-    Preprocess and exec async gaze estimation:  0.0001327991485595703
-    Post-process gaze:  0.019771575927734375
-    Post-process video writing and painting time:  6.6302924156188965
+    595  Frame(s) loading time:  2.779841423034668
+    Creating Image Frame pipeline: 
+    Preprocess and exec async for face detection:  2.462164878845215
+    Post-process face detection:  17.501105308532715
+    Preprocess and exec async for facial landmarks:  0.11006045341491699
+    Post-process facial landmarks:  1.4040935039520264
+    Preprocess and exec async head pose:  0.13110589981079102
+    Post-process head pose:  0.8902149200439453
+    Preprocess and exec async gaze estimation:  0.00014662742614746094
+    Post-process gaze:  0.020793676376342773
+    Post-process video writing and painting time:  6.754056930541992
 
 ```
 
@@ -70,7 +97,7 @@ exec.py
     --landmarks="facial_landmarks"
     --gaze="gaze_estimation"
     --device="CPU"
-    --precision="FP16"
+    --precisions_order="INT1,FP16,FP16,FP16"
     --conf="0.6"
     --prefix="/home/workspace/ir_models/intel/"
     --input_file="bin/demo.mp4"
@@ -110,7 +137,15 @@ inference_model.py
 
 - models/                               The models directory
 
-- scripts/      
+- pipeline/                             The pipeline directory containing list of pipelines:
+
+                                        - Pipeline.py
+                                        - ImageFrame.py
+                                        - Face.py
+                                        - Pose.py
+                                        - Gaze.py
+
+- scripts/
         
         - inference_layer.py            Measures / outputs the performance counts of each model
 
@@ -150,6 +185,7 @@ Async inferences have been used in these comamnd line scripts
 
 
 ## Documentation
+
 *TODO:* Include any documentation that users might need to better understand your project code. For instance, this is a good place to explain the command line arguments that your project supports.
 
 The `exec.py` file has used `concurrent.futures.ThreadPoolExecutor`
@@ -164,6 +200,30 @@ The models used are:
 
 - Gaze Estimation
 
+## Based on user input
+
+If you pass input_type as video, then the input video is used, otherwise in the cases where input_type is passed in as cam, the camera feed is used.
+
+exec.py
+
+```log
+    
+    --face="face_regular"
+    --pose="head_pose"
+    --landmarks="facial_landmarks"
+    --gaze="gaze_estimation"
+    --device="CPU"
+    --precisions_order="INT1,FP16,FP16,FP16"
+    --conf="0.6"
+    --prefix="/home/workspace/ir_models/intel/"
+    --input_file="bin/demo.mp4"
+    --batch_size="64"
+    --produce_batch_size="64"
+    --output_path="output_video.avi"
+    --input_type="video"
+    --video_len=595
+
+```
 
 ## Benchmarks
 *TODO:* Include the benchmark results of running your model on multiple hardwares and multiple model precisions. Your benchmarks can include: model loading time, input/output processing time, model inference time etc.
@@ -199,7 +259,8 @@ The models used are:
 ```
 
 
-## Results
+## Results (Benchmarking results for models of different precisions)
+
 *TODO:* Discuss the benchmark results and explain why you are getting the results you are getting. For instance, explain why there is difference in inference time for FP32, FP16 and INT8 models.
 
 ### Face Detection, Face Landmarks Detection, Gaze Estimation, Head Pose Estimation

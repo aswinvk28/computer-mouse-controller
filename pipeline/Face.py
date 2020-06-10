@@ -5,13 +5,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 class Face(Pipeline):
 
-    def __init__(self, model_type, model_class, objects, networks, objs, nets):
-        self.model_type = model_type
-        self.model_class = model_class
-        self.objects = objects
-        self.networks = networks
-        self.objs = objs
-        self.nets = nets
+    def __init__(self, model_type, model_class, objects, networks, objs, nets, logging=None):
+        Pipeline.__init__(self, model_type, model_class, objects, networks, objs, nets, logging)
         self.idx = 1
 
     def exec_result_face(self, obj, net, model_class, frames, request_id):
@@ -59,7 +54,7 @@ class Face(Pipeline):
 
     def run(self, args, frames, faces, model_classes):
         # preprocessing the face and executing the landmarks detection
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             for counter in range(0,len(frames),args.batch_size):
                 counter_array = [[counter]]
                 counter_array = np.array(counter_array)
@@ -80,7 +75,7 @@ class Face(Pipeline):
         nose, left_lip, right_lip = [], [], [], [], [], [], [], []
 
         # postprocessing the outputs, from landmarks detection
-        with ThreadPoolExecutor(max_workers=4) as executor:
+        with ThreadPoolExecutor(max_workers=3) as executor:
             for counter in range(0,len(frames),args.produce_batch_size):
                 counter_array = [[counter]]
                 counter_array = np.array(counter_array)
