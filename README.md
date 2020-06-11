@@ -150,9 +150,9 @@ inference_model.py
 - scripts/
         
         - inference_layer.py            Measures / outputs the performance counts of each model
-
+    
         - inference_model.py            Measures / prints out the model load time, inference time and input/output time
-
+    
         - Network.py                    The network python class that loads the models and executes inferences
 
 Async inferences have been used in these comamnd line scripts
@@ -160,13 +160,13 @@ Async inferences have been used in these comamnd line scripts
 - src/
 
         - Adapter.py                    The class that actas as a parent for inference model classes
-
+    
         - face_detection.py             The Face detection model 
-
+    
         - face_landmarks_detection.py   The Face landmarks detection model
-
+    
         - gaze_estimation.py            The Gaze estimation model
-
+    
         - head_pose_estimation.py       The Head Pose Estimation model
 
 - exec.py                               The command line file to execute the demo 
@@ -188,6 +188,13 @@ Async inferences have been used in these comamnd line scripts
 ### Video with Mouse Pointer
 
 ![./mouse_pointer.gif](./mouse_pointer.gif)
+
+
+
+### Measurement of FPS from Input Processing
+
+For the camera input, the FPS is calculated from the performance text as given in the how to run demo section.
+
 
 
 ## Documentation
