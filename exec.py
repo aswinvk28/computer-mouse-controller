@@ -16,7 +16,7 @@ from model_list import obtain_models
 
 import logging
 
-logging.basicConfig(filename='app.log', filemode='w') #optionally log into file
+logging.basicConfig(filename='app.log', filemode='w', level=logging.INFO) #optionally log into file
 
 
 CPU_EXTENSION = "/opt/intel/openvino/deployment_tools/inference_engine/lib/intel64/libcpu_extension_sse4.so"
@@ -160,7 +160,8 @@ model_paths, args, start_time, out, save=False):
 
     face, landmarks, pose_estimation, gaze = models
 
-    logging.info(len(frames), " Frame(s) loading time: ", end_time - start_time)
+    logging.info("""{f} Frame(s) loading time: {t}""".format(f=len(frames), 
+    t=(end_time - start_time)))
 
     logging.info("Creating Image Frame pipeline: ")
 
@@ -254,7 +255,7 @@ model_paths, args, start_time, out, save=False):
 
     if ext in is_video():
         default_pipeline.finalize_pipeline(out, frames, 
-        batch_gen_frames, face_boxes, 
+        args, batch_gen_frames, face_boxes, 
         left_eye, right_eye, 
         nose, left_lip, right_lip, 
         gaze_vector, save=save)

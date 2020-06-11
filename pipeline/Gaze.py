@@ -1,5 +1,6 @@
 from .Pipeline import Pipeline
 import cv2
+import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 
 class Gaze(Pipeline):
@@ -25,7 +26,7 @@ class Gaze(Pipeline):
     def run(self, args, frames, faces, cropped_left, 
     cropped_right, head_pose_angles, model_classes, cntr=None):
         # preprocessing the gaze and executing the landmarks detection
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             for counter in range(0,len(frames),args.batch_size):
                 try:
                     for ii in executor.map(range(1)):
@@ -53,3 +54,4 @@ class Gaze(Pipeline):
                         gaze_vector.append(g)
 
         return gaze_vector
+

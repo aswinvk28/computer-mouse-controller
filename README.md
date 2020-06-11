@@ -70,6 +70,8 @@ In order to download the OpenVINO models, `downloader.py` script is being used
 
 ```
 
+![./output_video.gif](./output_video.gif)
+
 ```log
 
     595  Frame(s) loading time:  2.779841423034668
@@ -182,6 +184,10 @@ Async inferences have been used in these comamnd line scripts
 - output_video.gif                      The demo file to show response of the models
 
 - mouse_pointer.gif                     The demo mouse pointer animation
+
+### Video with Mouse Pointer
+
+![./mouse_pointer.gif](./mouse_pointer.gif)
 
 
 ## Documentation

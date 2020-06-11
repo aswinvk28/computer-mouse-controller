@@ -26,7 +26,7 @@ class Pose(Pipeline):
 
     def run(self, args, frames, faces, model_classes):
         # preprocessing the face and executing the landmarks detection
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             for counter in range(0,len(frames),args.batch_size):
                 counter_array = [counter]
                 counter_array = np.array(counter_array)
@@ -43,7 +43,7 @@ class Pose(Pipeline):
         head_pose_angles = []
         
         # postprocessing the outputs, from landmarks detection
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             for counter in range(0,len(frames),args.produce_batch_size):
                 counter_array = [counter]
                 counter_array = np.array(counter_array)

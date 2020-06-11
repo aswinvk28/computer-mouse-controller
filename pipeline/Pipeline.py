@@ -46,7 +46,7 @@ class Pipeline:
 
     # load network by existence of model file path
     def run(self, model_classes, models_array, model_paths, args):
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             for ii, res in zip(list(range(len(model_classes))),
             executor.map(self.load_network, [args]*len(model_classes), 
             model_classes.tolist(), models_array.tolist(), 
@@ -92,17 +92,32 @@ class Pipeline:
         (15, 40), cv2.FONT_HERSHEY_COMPLEX, 0.75, (0, 255, 0), 2)
 
         return frame
+
+    def place_frames(self, ii, frame, img, gaze_vector, video_len):
+        xmin = 400 + ii % 300
+        xmax = 400 + ii % 300 + 80
+        ymin = 550 + ii % 120
+        ymax = 550 + ii % 120 + 80
+        xmin = np.min([xmin,xmax])
+        xmax = np.max([xmin,xmax])
+        ymin = np.min([ymin,ymax])
+        ymax = np.max([ymin,ymax])
+        
+        return xmin,xmax,ymin,ymax
     
-    def finalize_pipeline(self, out, frames, batch_gen_frames, face_boxes, 
+    def finalize_pipeline(self, out, frames, args, batch_gen_frames, face_boxes, 
     left_eye, right_eye, nose, left_lip, right_lip, 
     gaze_vector, save=False, pointer="mouse-pointer-2.png"):
         img = cv2.imread(pointer)
+        img = cv2.resize(img, (80,80))
         try:
             for ii, frame in enumerate(batch_gen_frames):
                 frame = self.write_pipeline(ii, frames, batch_gen_frames, face_boxes, 
                 left_eye, right_eye, nose, left_lip, right_lip, 
                 gaze_vector)
-                np.place(frame[400:600,60:260], (img != 0), img)
+                xmin,xmax,ymin,ymax = self.place_frames(ii, frame, img, 
+                gaze_vector, args.video_len)
+                np.place(frame[ymin:ymax,xmin:xmax], (img != 0), img)
                 if save:
                     out.write(frame)
         except Exception as e:

@@ -16,7 +16,7 @@ class ImageFrame(Pipeline):
 
     # preprocessing the model, executing the async inference
     def run(self, args, frames, model_classes):
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             for counter in range(0,len(frames),args.batch_size):
                 counter_array = [[counter]]
                 counter_array = np.array(counter_array)
@@ -54,7 +54,7 @@ class ImageFrame(Pipeline):
         gen_frames, faces, face_boxes = [], [], []
 
         # postprocessing the outputs, from face detection for all objects
-        with ThreadPoolExecutor(max_workers=3) as executor:
+        with ThreadPoolExecutor(max_workers=2) as executor:
             for counter in range(0,len(frames),args.produce_batch_size):
                 counter_array = [[counter]]
                 counter_array = np.array(counter_array)
