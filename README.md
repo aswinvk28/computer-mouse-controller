@@ -213,6 +213,130 @@ The models used are:
 
 - Gaze Estimation
 
+## Code Explanation
+
+![./images/pipeline.png](./images/pipeline.png)
+
+```python
+
+def run_pipeline(logging, frames, models, model_classes, models_array, 
+model_paths, args, start_time, out, save=False):
+
+    end_time = time.time()
+
+    face, landmarks, pose_estimation, gaze = models
+
+    logging.info("""{f} Frame(s) loading time: {t}""".format(f=len(frames), 
+    t=(end_time - start_time)))
+
+    logging.info("Creating Image Frame pipeline: ")
+
+    default_pipeline = Pipeline(model_type=None, model_class=None, objects={}, 
+    networks={}, objs={}, nets={}, logging=logging)
+
+    # load the network objects
+    default_pipeline.run(model_classes, models_array, model_paths, args)
+
+    image_frame = ImageFrame(model_type=face, model_class=model_classes, 
+    objects=default_pipeline.objects, networks=default_pipeline.networks, 
+    objs=default_pipeline.objs, nets=default_pipeline.nets)
+
+    face_detection = Face(model_type=landmarks, model_class=model_classes.tolist()[1], 
+    objects=default_pipeline.objects, networks=default_pipeline.networks, 
+    objs=default_pipeline.objs, nets=default_pipeline.nets)
+
+    gaze_estimation = Gaze(model_type=gaze, model_class=model_classes.tolist()[3], 
+    objects=default_pipeline.objects, networks=default_pipeline.networks, 
+    objs=default_pipeline.objs, nets=default_pipeline.nets)
+
+    start_time = time.time()
+
+    image_frame.run(args, frames, model_classes)
+
+    logging.info("""Preprocess and exec async for face detection: {t}""".format(t=(time.time() - start_time)))
+
+    # for each n batches and for each batch_size
+    start_time = time.time()
+
+    gen_frames, faces, face_boxes = \
+        image_frame.produce(args, frames, model_classes)
+
+    logging.info("""Post-process face detection: {t}""".format(t=(time.time() - start_time)))
+
+    start_time = time.time()
+    
+    face_detection.run(args, frames, faces, model_classes)
+
+    logging.info("""Preprocess and exec async for facial landmarks: {t}""".format(t=(time.time() - start_time)))
+
+    start_time = time.time()
+
+    batch_gen_frames, cropped_left, \
+        cropped_right, left_eye, right_eye, \
+        nose, left_lip, right_lip = \
+            face_detection.produce(args, frames, gen_frames, faces, face_boxes, 
+    model_classes)
+
+    logging.info("""Post-process facial landmarks: {t}""".format(t=(time.time() - start_time)))
+
+    start_time = time.time()
+
+    pose_model = Pose(model_type=pose_estimation, 
+    model_class=model_classes.tolist()[2], 
+    objects=default_pipeline.objects, networks=default_pipeline.networks, 
+    objs=default_pipeline.objs, nets=default_pipeline.nets)
+
+    pose_model.run(args, frames, faces, model_classes)
+    
+    logging.info("""Preprocess and exec async head pose: {t}""".format(t=(time.time() - start_time)))
+
+    start_time = time.time()
+
+    head_pose_angles = pose_model.produce(args, frames, 
+    batch_gen_frames, model_classes)
+
+    logging.info("""Post-process head pose: {t}""".format(t=(time.time() - start_time)))
+
+    gen_frames = None
+
+    start_time = time.time()
+    # preprocessing the gaze and executing the landmarks detection
+    gaze_estimation.run(args, frames, faces, 
+    cropped_left, cropped_right, 
+    head_pose_angles, model_classes)
+
+    logging.info("""Preprocess and exec async gaze estimation: {t}""".format(t=(time.time() - start_time)))
+
+    faces = None
+
+    start_time = time.time()
+    # post process gaze vector
+    gaze_vector = gaze_estimation.produce(args, frames, batch_gen_frames, 
+    model_classes)
+
+    logging.info("""Post-process gaze: {t}""".format(t=(time.time() - start_time)))
+
+    start_time = time.time()
+    ext = os.path.splitext(args.output_path)[1]
+
+    if ext in is_video():
+        default_pipeline.finalize_pipeline(out, frames, 
+        args, batch_gen_frames, face_boxes, 
+        left_eye, right_eye, 
+        nose, left_lip, right_lip, 
+        gaze_vector, save=save)
+    else:
+        frame = default_pipeline.write_pipeline(0, frames, batch_gen_frames, face_boxes, 
+        left_eye, right_eye, nose, left_lip, right_lip, 
+        gaze_vector)
+        cv2.imwrite(out, frame)
+
+    logging.info("""Post-process video writing and painting time: {t}""".format(t=(time.time() - start_time)))
+
+    return batch_gen_frames
+
+```
+
 ## Based on user input
 
 If you pass input_type as video, then the input video is used, otherwise in the cases where input_type is passed in as cam, the camera feed is used.
